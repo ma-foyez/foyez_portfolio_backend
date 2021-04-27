@@ -14,7 +14,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 const app = express();
 // app.use(bodyParser.json());
 app.use(cors());
-//===
+//this 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({
     limit: '50mb',
@@ -41,6 +41,14 @@ client.connect(err => {
         portfolioCollection.find({})
             .toArray((err, documents) => {
                 res.send(documents);
+            })
+    })
+
+    // delete portfolio from database
+    app.delete('/portfolio-delete', (req, res) => {
+        portfolioCollection.deleteOne({ _id: ObjectId(req.query.id) })
+            .then(result => {
+                res.send(result)
             })
     })
     //close portfolio collection
