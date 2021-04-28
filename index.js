@@ -24,12 +24,12 @@ app.use(bodyParser.urlencoded({
 
 client.connect(err => {
     const portfolioCollection = client.db("Portfolio_Database").collection("PortfolioList");
+    const skillsCollection = client.db("Portfolio_Database").collection("skillList");
     // perform actions on the collection object
 
     //post portfolio
     app.post('/create-portfolio', (req, res) => {
         const portfolio = req.body;
-        console.log('portfolio :>> ', portfolio);
         portfolioCollection.insertOne(portfolio)
             .then(result => {
                 res.send(result.insertedCount > 0);
@@ -51,7 +51,50 @@ client.connect(err => {
                 res.send(result)
             })
     })
-    //close portfolio collection
+
+    //add skills
+    app.post('/add-skill', (req, res) => {
+        const skillData = req.body;
+        console.log('skillData :>> ', skillData);
+        skillsCollection.insertOne(skillData)
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+    })
+    //get skills list data
+    app.get('/skill-list', (req, res) => {
+        skillsCollection.find({})
+            .toArray((err, documents) => {
+                res.send(documents);
+            })
+    })
+
+    // delete skill from database
+    app.delete('/skill-delete', (req, res) => {
+        skillsCollection.deleteOne({ _id: ObjectId(req.query.id) })
+            .then(result => {
+                res.send(result)
+            })
+    })
+
+    // load single event
+    app.get('/skill/:id', (req, res) => {
+        skillsCollection.find({ _id: ObjectId(req.params.id) })
+            .toArray((err, documents) => {
+                res.send(documents[0])
+            })
+    })
+
+    //update skills
+    app.patch('/update-skill', (req, res) => {
+        skillsCollection.updateOne({ _id: ObjectId(req.query.id) }, {
+            $set: { technology: req.body.technology, expertise_level: req.body.expertise_level, tech_logo: req.body.tech_logo, tech_logoPreview: req.body.tech_logoPreview }
+        })
+            .then(result => {
+                res.send(result)
+            })
+    })
+    //close  collection
     console.log('Database connected');
     // client.close();
 });
